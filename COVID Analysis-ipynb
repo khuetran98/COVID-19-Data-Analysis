@@ -1,0 +1,181 @@
+# Import Data
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+confirmed  = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
+deaths     = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
+recoveries = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv')
+
+from datetime import date
+from datetime import timedelta
+from functools import reduce
+
+confirmed.head()
+deaths.head()
+recoveries.head()
+
+
+# The latest situation: total cases of the most recent day
+def latest_situation(country):
+  df = pd.DataFrame(confirmed['Country/Region'])
+  df['Latest_confirmed_cases'] = confirmed.iloc[: , -1]
+  df['Latest_death_cases'] = deaths.iloc[: , -1]
+  df['Latest_recovery_cases'] = recoveries.iloc[: , -1]
+  return df[df['Country/Region'] == country]
+
+latest_situation('China')
+selected_columns = [col for col in confirmed.columns if (col >= '1/22/20') and (col <= '10/31/20')] + ['Country/Region']
+selected_columns
+
+# Extract columns until 31 Oct 2020
+Confirmed_Oct31 = pd.DataFrame(confirmed.loc[: , :'10/31/20'])
+Confirmed_Oct31.drop(['Lat', 'Long'], axis=1, inplace=True)
+Confirmed_Oct31['Total confirmed cases'] = pd.DataFrame(Confirmed_Oct31.sum(axis=1))
+
+Deaths_Oct31 = pd.DataFrame(deaths.loc[: , :'10/31/20'])
+Deaths_Oct31.drop(['Lat', 'Long'], axis=1, inplace=True)
+Deaths_Oct31['Total deaths'] = pd.DataFrame(Deaths_Oct31.sum(axis=1))
+
+Recoveries_Oct31 = pd.DataFrame(recoveries.loc[: , :'10/31/20'])
+Recoveries_Oct31.drop(['Lat', 'Long'], axis=1, inplace=True)
+Recoveries_Oct31['Total recoveries'] = pd.DataFrame(Recoveries_Oct31.sum(axis=1))
+
+#Top 5 countries by the total number of confirmed cases
+Confirmed_Oct31.sort_values(by=['Total confirmed cases'], inplace=True, ascending=False)
+Sort = Confirmed_Oct31.head(5)
+
+#New data frame
+data_Confirmed = Sort[['Country/Region', 'Total confirmed cases']]
+
+#Plot: Cumulative cases until Oct 31 2020
+
+plt.figure(figsize = (15, 12))
+
+#Total confirmed cases
+plt.subplot(131)
+sns.barplot(data = data, x = 'Country/Region', y = 'Total confirmed cases')
+
+#Total deaths
+plt.subplot(132)
+sns.barplot(data = data, x = 'Country/Region', y = 'Total deaths')
+
+#Total recoveries
+plt.subplot(133)
+sns.barplot(data = data, x = 'Country/Region', y = 'Total recoveries')
+
+plt.show()
+
+def split_by_month(data):
+  Jan = pd.DataFrame(data.loc[: ,'1/22/20' :'1/31/20'])
+  Jan['Jan'] = pd.DataFrame(Jan.sum(axis=1))
+  Jan['Country/Region'] = data['Country/Region']
+  Jan = Jan[Jan['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Jan = Jan[['Country/Region', 'Jan']]
+
+  Feb = pd.DataFrame(data.loc[: ,'2/1/20' :'2/29/20'])
+  Feb['Feb'] = pd.DataFrame(Feb.sum(axis=1))
+  Feb['Country/Region'] = data['Country/Region']
+  Feb = Feb[Feb['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Feb = Feb[['Country/Region', 'Feb']]
+
+  Mar = pd.DataFrame(data.loc[: ,'3/1/20' :'3/31/20'])
+  Mar['Mar'] = pd.DataFrame(Mar.sum(axis=1))
+  Mar['Country/Region'] = data['Country/Region']
+  Mar = Mar[Mar['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Mar = Mar[['Country/Region', 'Mar']]
+
+  Apr = pd.DataFrame(data.loc[: ,'4/1/20' :'4/30/20'])
+  Apr['Apr'] = pd.DataFrame(Apr.sum(axis=1))
+  Apr['Country/Region'] = data['Country/Region']
+  Apr = Apr[Apr['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Apr = Apr[['Country/Region', 'Apr']]
+
+  May = pd.DataFrame(data.loc[: ,'5/1/20' :'5/31/20'])
+  May['May'] = pd.DataFrame(May.sum(axis=1))
+  May['Country/Region'] = data['Country/Region']
+  May = May[May['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  May = May[['Country/Region', 'May']]
+
+  Jun = pd.DataFrame(data.loc[: ,'6/1/20' :'6/30/20'])
+  Jun['Jun'] = pd.DataFrame(Jun.sum(axis=1))
+  Jun['Country/Region'] = confirmed['Country/Region']
+  Jun = Jun[Jun['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Jun = Jun[['Country/Region', 'Jun']]
+
+  Jul = pd.DataFrame(data.loc[: ,'7/1/20' :'7/31/20'])
+  Jul['Jul'] = pd.DataFrame(Jul.sum(axis=1))
+  Jul['Country/Region'] = data['Country/Region']
+  Jul = Jul[Jul['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Jul = Jul[['Country/Region', 'Jul']]
+
+  Aug = pd.DataFrame(data.loc[: ,'8/1/20' :'8/31/20'])
+  Aug['Aug'] = pd.DataFrame(Aug.sum(axis=1))
+  Aug['Country/Region'] = data['Country/Region']
+  Aug = Aug[Aug['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Aug = Aug[['Country/Region', 'Aug']]
+
+  Sep = pd.DataFrame(data.loc[: ,'9/1/20' :'9/30/20'])
+  Sep['Sep'] = pd.DataFrame(Sep.sum(axis=1))
+  Sep['Country/Region'] = data['Country/Region']
+  Sep = Sep[Sep['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Sep = Sep[['Country/Region', 'Sep']]
+
+  Oct = pd.DataFrame(data.loc[: ,'10/1/20' :'10/31/20'])
+  Oct['Oct'] = pd.DataFrame(Oct.sum(axis=1))
+  Oct['Country/Region'] = data['Country/Region']
+  Oct = Oct[Oct['Country/Region'].isin(data_Confirmed['Country/Region'].tolist())]
+  Oct = Oct[['Country/Region', 'Oct']]
+
+  dfs = [Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct]
+
+  dfs = reduce(lambda left, right: pd.merge(left, right, on=["Country/Region"], how="outer"), dfs)
+  dfs = pd.melt(dfs, id_vars='Country/Region', value_vars= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+             var_name='Months', value_name = 'Cases')
+  return dfs
+
+Confirmed = split_by_month(confirmed)
+Deaths = split_by_month(deaths)
+Recoveries = split_by_month(recoveries)
+
+#Plot: Number of cases by Month
+plt.figure(figsize = (15, 8))
+
+plt.subplot(131)
+sns.lineplot(data = Confirmed, x = 'Months', y = 'Cases', hue = 'Country/Region').set(title='Total confirmed cases')
+
+plt.subplot(132)
+sns.lineplot(data = Deaths, x = 'Months', y = 'Cases', hue = 'Country/Region').set(title='Total deaths')
+
+plt.subplot(133)
+sns.lineplot(data = Recoveries, x = 'Months', y = 'Cases', hue = 'Country/Region').set(title='Total recoveries')
+
+plt.show()
+
+#Percentage change
+new_data = (Confirmed
+            .merge(Deaths, on=['Country/Region', 'Months'], how='left')
+            .merge(Recoveries, on=['Country/Region', 'Months'], how='left'))
+
+new_data.columns = ['Country/Region', 'Months', 'Confirmed cases', 'Deaths', 'Recoveries']
+new_data['Recovery/Total cases'] = new_data['Recoveries']/new_data['Confirmed cases'] * 100
+new_data['Recovery/Total cases'] = new_data['Recovery/Total cases'].fillna(0)
+
+#Plot
+plt.figure(figsize = (15, 8))
+sns.lineplot(data = new_data, x = 'Months', y = 'Recovery/Total cases', hue = 'Country/Region').set(title='Recovery Rate (%)')
+
+new_data2 = new_data.pivot(index = 'Months', columns = 'Country/Region', values = 'Recovery/Total cases')
+new_data2.index = pd.Categorical(new_data2.index,
+                          categories=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                          ordered=True)
+new_data2 = new_data2.sort_index()
+
+#new_data3 contains data regarding percentage change by month
+new_data3 = new_data2.pct_change().reset_index()
+
+new_data3 = pd.melt(new_data3, id_vars='index', value_vars= ['Brazil', 'India', 'Russia', 'Spain', 'US'] ,
+             var_name='Country/Region', value_name = '% changes by Month')
+#Plot
+plt.figure(figsize = (15, 8))
+sns.lineplot(data = new_data3, x = 'index', y = '% changes by Month', hue = 'Country/Region').set(title='% changes of Recovery Rate (%)')
